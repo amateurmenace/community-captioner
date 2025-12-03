@@ -908,13 +908,22 @@
             // Save settings whenever they change
             useEffect(() => {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-                // Also send to server for OBS overlay
+                // Send to local server for OBS overlay
                 fetch('/api/caption', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ settings })
-                }).catch(err => console.log('Failed to sync settings:', err));
-            }, [settings]);
+                }).catch(err => console.log('Failed to sync settings locally:', err));
+
+                // Also send to remote server if configured
+                if (remoteServer) {
+                    fetch(`${remoteServer}/api/caption`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ settings })
+                    }).catch(err => console.log('Failed to sync settings to remote:', err));
+                }
+            }, [settings, remoteServer]);
 
             // Save caption for overlay
             useEffect(() => {
