@@ -706,10 +706,16 @@
             backgroundOpacity: 70,
             textAlign: 'center',
             position: 'bottom',
-            maxLines: 3,
+            maxLines: 1,
+            maxWidth: 80,  // percentage of screen width
             showBackground: true,
             textShadow: true,
-            language: 'en-US'
+            language: 'en-US',
+            // Logo/bug settings
+            logoUrl: '',
+            logoPosition: 'bottom-right',
+            logoSize: 100,
+            logoOpacity: 100
         };
 
         // Available fonts
@@ -1464,12 +1470,29 @@
                                     {activeTab === 'advanced' && (
                                         <>
                                             <div className="form-group">
-                                                <label className="form-label">Maximum Lines: {settings.maxLines}</label>
-                                                <input 
-                                                    type="range" 
+                                                <label className="form-label">Caption Width: {settings.maxWidth || 80}%</label>
+                                                <input
+                                                    type="range"
                                                     className="form-range"
-                                                    min="1" 
-                                                    max="6" 
+                                                    min="20"
+                                                    max="100"
+                                                    step="5"
+                                                    value={settings.maxWidth || 80}
+                                                    onChange={(e) => updateSetting('maxWidth', parseInt(e.target.value))}
+                                                />
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-light)' }}>
+                                                    <span>Narrow</span>
+                                                    <span>Full Width</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label className="form-label">Maximum Lines: {settings.maxLines}</label>
+                                                <input
+                                                    type="range"
+                                                    className="form-range"
+                                                    min="1"
+                                                    max="4"
                                                     value={settings.maxLines}
                                                     onChange={(e) => updateSetting('maxLines', parseInt(e.target.value))}
                                                 />
@@ -1477,7 +1500,7 @@
 
                                             <div className="form-group">
                                                 <div className="toggle-wrapper">
-                                                    <div 
+                                                    <div
                                                         className={`toggle ${settings.showBackground ? 'active' : ''}`}
                                                         onClick={() => updateSetting('showBackground', !settings.showBackground)}
                                                     ></div>
@@ -1487,13 +1510,100 @@
 
                                             <div className="form-group">
                                                 <div className="toggle-wrapper">
-                                                    <div 
+                                                    <div
                                                         className={`toggle ${settings.textShadow ? 'active' : ''}`}
                                                         onClick={() => updateSetting('textShadow', !settings.textShadow)}
                                                     ></div>
                                                     <span className="form-label" style={{ marginBottom: 0 }}>Text Shadow</span>
                                                 </div>
                                             </div>
+
+                                            <hr style={{ border: 'none', borderTop: '2px solid var(--bg-light)', margin: '20px 0' }} />
+
+                                            <h4 style={{ color: 'var(--primary-green)', marginBottom: '16px' }}>Logo / Bug Overlay</h4>
+
+                                            <div className="form-group">
+                                                <label className="form-label">Logo Image URL</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-input"
+                                                    placeholder="https://example.com/logo.png"
+                                                    value={settings.logoUrl || ''}
+                                                    onChange={(e) => updateSetting('logoUrl', e.target.value)}
+                                                />
+                                                <small style={{ color: 'var(--text-light)', fontSize: '12px' }}>
+                                                    Enter a URL to a PNG or JPG image (transparent PNG recommended)
+                                                </small>
+                                            </div>
+
+                                            {settings.logoUrl && (
+                                                <>
+                                                    <div className="form-group">
+                                                        <label className="form-label">Logo Position</label>
+                                                        <select
+                                                            className="form-input form-select"
+                                                            value={settings.logoPosition || 'bottom-right'}
+                                                            onChange={(e) => updateSetting('logoPosition', e.target.value)}
+                                                        >
+                                                            <option value="top-left">Top Left</option>
+                                                            <option value="top-right">Top Right</option>
+                                                            <option value="bottom-left">Bottom Left</option>
+                                                            <option value="bottom-right">Bottom Right</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div className="form-group">
+                                                        <label className="form-label">Logo Size: {settings.logoSize || 100}px</label>
+                                                        <input
+                                                            type="range"
+                                                            className="form-range"
+                                                            min="30"
+                                                            max="300"
+                                                            step="10"
+                                                            value={settings.logoSize || 100}
+                                                            onChange={(e) => updateSetting('logoSize', parseInt(e.target.value))}
+                                                        />
+                                                    </div>
+
+                                                    <div className="form-group">
+                                                        <label className="form-label">Logo Opacity: {settings.logoOpacity || 100}%</label>
+                                                        <input
+                                                            type="range"
+                                                            className="form-range"
+                                                            min="10"
+                                                            max="100"
+                                                            step="5"
+                                                            value={settings.logoOpacity || 100}
+                                                            onChange={(e) => updateSetting('logoOpacity', parseInt(e.target.value))}
+                                                        />
+                                                    </div>
+
+                                                    <div style={{
+                                                        background: '#1a1a2e',
+                                                        borderRadius: '8px',
+                                                        padding: '16px',
+                                                        marginTop: '12px',
+                                                        position: 'relative',
+                                                        height: '100px'
+                                                    }}>
+                                                        <span style={{ position: 'absolute', top: '4px', left: '8px', fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>Logo Preview</span>
+                                                        <img
+                                                            src={settings.logoUrl}
+                                                            alt="Logo preview"
+                                                            style={{
+                                                                position: 'absolute',
+                                                                maxHeight: '60px',
+                                                                opacity: (settings.logoOpacity || 100) / 100,
+                                                                ...(settings.logoPosition === 'top-left' ? { top: '20px', left: '10px' } : {}),
+                                                                ...(settings.logoPosition === 'top-right' ? { top: '20px', right: '10px' } : {}),
+                                                                ...(settings.logoPosition === 'bottom-left' ? { bottom: '10px', left: '10px' } : {}),
+                                                                ...(settings.logoPosition === 'bottom-right' ? { bottom: '10px', right: '10px' } : {})
+                                                            }}
+                                                            onError={(e) => { e.target.style.display = 'none'; }}
+                                                        />
+                                                    </div>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                 </div>

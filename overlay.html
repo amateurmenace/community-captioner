@@ -50,7 +50,7 @@
         }
 
         .caption-text {
-            max-width: 90%;
+            max-width: 80%;
             word-wrap: break-word;
             line-height: 1.4;
             font-size: 48px;
@@ -61,6 +61,11 @@
             padding: 16px 32px;
             border-radius: 12px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            /* Line limiting */
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            overflow: hidden;
         }
 
         .status-indicator {
@@ -73,6 +78,7 @@
             border-radius: 8px;
             font-family: 'Open Sans', sans-serif;
             font-size: 14px;
+            z-index: 1000;
         }
 
         .status-indicator.error {
@@ -82,11 +88,47 @@
         .status-indicator.connected {
             background: rgba(0, 166, 118, 0.9);
         }
+
+        /* Logo/Bug overlay */
+        .logo-overlay {
+            position: absolute;
+            z-index: 100;
+            display: none;
+        }
+
+        .logo-overlay.top-left {
+            top: 40px;
+            left: 40px;
+        }
+
+        .logo-overlay.top-right {
+            top: 40px;
+            right: 40px;
+        }
+
+        .logo-overlay.bottom-left {
+            bottom: 40px;
+            left: 40px;
+        }
+
+        .logo-overlay.bottom-right {
+            bottom: 40px;
+            right: 40px;
+        }
+
+        .logo-overlay img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
     <div class="overlay-container">
         <div id="statusIndicator" class="status-indicator">Loading...</div>
+        <div id="logoOverlay" class="logo-overlay bottom-right">
+            <img id="logoImage" src="" alt="Logo">
+        </div>
         <div id="captionWrapper" class="caption-display bottom">
             <div id="captionText" class="caption-text">Waiting for captions...</div>
         </div>
@@ -97,6 +139,8 @@
         var captionText = document.getElementById('captionText');
         var captionWrapper = document.getElementById('captionWrapper');
         var statusIndicator = document.getElementById('statusIndicator');
+        var logoOverlay = document.getElementById('logoOverlay');
+        var logoImage = document.getElementById('logoImage');
         var connectionOk = false;
         var fetchCount = 0;
 
@@ -109,8 +153,15 @@
             backgroundOpacity: 70,
             textAlign: 'center',
             position: 'bottom',
+            maxLines: 2,
+            maxWidth: 80,
             showBackground: true,
-            textShadow: true
+            textShadow: true,
+            // Logo settings
+            logoUrl: '',
+            logoPosition: 'bottom-right',
+            logoSize: 100,
+            logoOpacity: 100
         };
 
         function applySettings(settings) {
@@ -135,6 +186,14 @@
             // Apply text alignment
             captionText.style.textAlign = currentSettings.textAlign;
 
+            // Apply max width
+            captionText.style.maxWidth = currentSettings.maxWidth + '%';
+
+            // Apply line limit
+            var maxLines = currentSettings.maxLines || 2;
+            captionText.style.webkitLineClamp = maxLines;
+            captionText.style.lineClamp = maxLines;
+
             // Apply background
             if (currentSettings.showBackground) {
                 var hex = currentSettings.backgroundColor;
@@ -156,6 +215,18 @@
 
             // Apply position
             captionWrapper.className = 'caption-display ' + currentSettings.position;
+
+            // Apply logo settings
+            if (currentSettings.logoUrl && currentSettings.logoUrl.trim() !== '') {
+                logoImage.src = currentSettings.logoUrl;
+                logoOverlay.style.display = 'block';
+                logoOverlay.className = 'logo-overlay ' + currentSettings.logoPosition;
+                logoOverlay.style.width = currentSettings.logoSize + 'px';
+                logoOverlay.style.height = currentSettings.logoSize + 'px';
+                logoOverlay.style.opacity = currentSettings.logoOpacity / 100;
+            } else {
+                logoOverlay.style.display = 'none';
+            }
         }
 
         function updateStatus(message, isError) {
@@ -187,7 +258,7 @@
                             // Update caption text
                             if (data.caption) {
                                 captionText.textContent = data.caption;
-                                captionText.style.display = 'block';
+                                captionText.style.display = '-webkit-box';
                             } else {
                                 captionText.style.display = 'none';
                             }
