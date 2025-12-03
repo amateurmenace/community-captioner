@@ -257,6 +257,113 @@
             text-decoration: none;
         }
 
+        /* Platform tabs */
+        .platform-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .platform-tab {
+            background: var(--bg-light);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            color: var(--text-light);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .platform-tab:hover {
+            background: var(--bg-card);
+            color: var(--text-white);
+        }
+
+        .platform-tab.active {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .platform-content {
+            display: none;
+        }
+
+        .platform-content.active {
+            display: block;
+        }
+
+        .instruction-list {
+            margin: 12px 0;
+            padding-left: 24px;
+            color: var(--text-medium);
+        }
+
+        .instruction-list li {
+            margin-bottom: 8px;
+        }
+
+        kbd {
+            background: var(--bg-light);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 13px;
+            border: 1px solid #3a3a5a;
+        }
+
+        .command-label {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 8px;
+            margin-top: 16px;
+        }
+
+        .command-label:first-child {
+            margin-top: 0;
+        }
+
+        .code-block.copyable {
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .code-block.copyable:hover {
+            border-color: var(--primary-green);
+            background: #111118;
+        }
+
+        .code-block.copyable .copy-hint {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: var(--text-light);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .code-block.copyable:hover .copy-hint {
+            opacity: 1;
+        }
+
+        .code-block.copyable.copied {
+            border-color: var(--primary-green);
+        }
+
+        .code-block.copyable.copied .copy-hint {
+            color: var(--primary-green);
+            opacity: 1;
+        }
+
+        .code-block code {
+            color: #10B981;
+        }
+
         @media (max-width: 600px) {
             h1 {
                 font-size: 28px;
@@ -267,6 +374,14 @@
             .download-btn {
                 width: 100%;
                 justify-content: center;
+            }
+            .platform-tabs {
+                flex-wrap: wrap;
+            }
+            .platform-tab {
+                flex: 1;
+                min-width: 80px;
+                text-align: center;
             }
         }
     </style>
@@ -310,47 +425,157 @@
         <div class="card">
             <h2 class="card-title">
                 <span class="step-number">2</span>
-                Install Dependencies
+                Open Terminal
             </h2>
-            <p>Open Terminal (Mac/Linux) or Command Prompt (Windows) and run:</p>
 
-            <div class="code-block">
-                <span class="comment"># Install required Python packages</span><br>
-                pip3 install SpeechRecognition pyaudio
+            <div class="platform-tabs">
+                <button class="platform-tab active" onclick="showPlatform('mac')">Mac</button>
+                <button class="platform-tab" onclick="showPlatform('windows')">Windows</button>
+                <button class="platform-tab" onclick="showPlatform('linux')">Linux</button>
             </div>
 
-            <div class="warning-box">
-                <h4>Mac Users</h4>
-                <p>If pyaudio fails to install, first run: <code>brew install portaudio</code></p>
+            <div id="mac-instructions" class="platform-content active">
+                <p><strong>How to open Terminal on Mac:</strong></p>
+                <ol class="instruction-list">
+                    <li>Press <kbd>Cmd</kbd> + <kbd>Space</kbd> to open Spotlight</li>
+                    <li>Type <strong>Terminal</strong> and press Enter</li>
+                </ol>
+            </div>
+
+            <div id="windows-instructions" class="platform-content">
+                <p><strong>How to open Command Prompt on Windows:</strong></p>
+                <ol class="instruction-list">
+                    <li>Press <kbd>Win</kbd> + <kbd>R</kbd> to open Run</li>
+                    <li>Type <strong>cmd</strong> and press Enter</li>
+                </ol>
+            </div>
+
+            <div id="linux-instructions" class="platform-content">
+                <p><strong>How to open Terminal on Linux:</strong></p>
+                <ol class="instruction-list">
+                    <li>Press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd></li>
+                    <li>Or search for "Terminal" in your applications menu</li>
+                </ol>
             </div>
         </div>
 
         <div class="card">
             <h2 class="card-title">
                 <span class="step-number">3</span>
-                Run the App
+                Install Dependencies
             </h2>
-            <p>Navigate to the extracted folder and run the start script:</p>
+            <p>Copy and paste these commands into your terminal, one at a time:</p>
 
-            <div class="code-block">
-                <span class="comment"># Navigate to the folder</span><br>
-                cd community-captioner<br><br>
-                <span class="comment"># Start the captioner</span><br>
-                python3 start-server.py
+            <div id="mac-deps" class="platform-content active">
+                <p class="command-label">First, install portaudio (required for microphone access):</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>brew install portaudio</code>
+                </div>
+
+                <p class="command-label">Then install the Python packages:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>pip3 install SpeechRecognition pyaudio</code>
+                </div>
+
+                <div class="warning-box">
+                    <h4>Don't have Homebrew?</h4>
+                    <p>Install it first by pasting this command:</p>
+                    <div class="code-block copyable" onclick="copyCode(this)" style="margin-top: 8px; margin-bottom: 0;">
+                        <span class="copy-hint">Click to copy</span>
+                        <code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code>
+                    </div>
+                </div>
             </div>
 
-            <p>This will open the control panel in your browser at <code>http://localhost:8080</code></p>
+            <div id="windows-deps" class="platform-content">
+                <p class="command-label">Install the Python packages:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>pip install SpeechRecognition pyaudio</code>
+                </div>
 
-            <div class="info-box">
-                <h4>Connect to Cloud Server</h4>
-                <p>In the control panel, enter this URL in the "Remote Server" field to sync captions to your OBS overlay:</p>
-                <div class="code-block" style="margin-bottom: 0;">http://138.197.15.64:8080</div>
+                <div class="warning-box">
+                    <h4>If pyaudio fails to install</h4>
+                    <p>Download the wheel file from <a href="https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyaudio" target="_blank" style="color: var(--accent-red);">here</a> and install it with: <code>pip install [downloaded-file].whl</code></p>
+                </div>
+            </div>
+
+            <div id="linux-deps" class="platform-content">
+                <p class="command-label">First, install portaudio:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>sudo apt-get install portaudio19-dev python3-pyaudio</code>
+                </div>
+
+                <p class="command-label">Then install the Python packages:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>pip3 install SpeechRecognition pyaudio</code>
+                </div>
             </div>
         </div>
 
         <div class="card">
             <h2 class="card-title">
                 <span class="step-number">4</span>
+                Run the App
+            </h2>
+            <p>After downloading, the zip file is in your Downloads folder. Copy and paste these commands:</p>
+
+            <div id="mac-run" class="platform-content active">
+                <p class="command-label">Go to your Downloads folder and unzip:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>cd ~/Downloads && unzip community-captioner.zip</code>
+                </div>
+
+                <p class="command-label">Go into the folder and start the app:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>cd ~/Downloads/community-captioner && python3 start-server.py</code>
+                </div>
+            </div>
+
+            <div id="windows-run" class="platform-content">
+                <p class="command-label">Go to your Downloads folder:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>cd %USERPROFILE%\Downloads\community-captioner</code>
+                </div>
+
+                <p class="command-label">Start the app:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>python start-server.py</code>
+                </div>
+            </div>
+
+            <div id="linux-run" class="platform-content">
+                <p class="command-label">Go to your Downloads folder and unzip:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>cd ~/Downloads && unzip community-captioner.zip</code>
+                </div>
+
+                <p class="command-label">Go into the folder and start the app:</p>
+                <div class="code-block copyable" onclick="copyCode(this)">
+                    <span class="copy-hint">Click to copy</span>
+                    <code>cd ~/Downloads/community-captioner && python3 start-server.py</code>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>What happens next?</h4>
+                <p>Your browser will automatically open to <code>http://localhost:8080</code> - this is your control panel!</p>
+                <p style="margin-top: 8px;">In the control panel, the Remote Server field should already be set to sync with our cloud. Just click "Start Listening" to begin!</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">
+                <span class="step-number">5</span>
                 Add to OBS
             </h2>
             <p>In OBS Studio, add a Browser Source with these settings:</p>
@@ -393,6 +618,37 @@
             const btn = document.querySelector('.copy-btn');
             btn.textContent = 'Copied!';
             setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+
+        function showPlatform(platform) {
+            // Update tabs
+            document.querySelectorAll('.platform-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content sections
+            document.querySelectorAll('.platform-content').forEach(content => {
+                content.classList.remove('active');
+            });
+
+            // Show all sections for this platform
+            document.getElementById(platform + '-instructions')?.classList.add('active');
+            document.getElementById(platform + '-deps')?.classList.add('active');
+            document.getElementById(platform + '-run')?.classList.add('active');
+        }
+
+        function copyCode(element) {
+            const code = element.querySelector('code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const hint = element.querySelector('.copy-hint');
+                hint.textContent = 'Copied!';
+                element.classList.add('copied');
+                setTimeout(() => {
+                    hint.textContent = 'Click to copy';
+                    element.classList.remove('copied');
+                }, 2000);
+            });
         }
     </script>
 </body>
