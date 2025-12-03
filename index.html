@@ -836,16 +836,20 @@
                 const url = `${baseUrl}?overlay=true`;
                 setOverlayUrl(url);
 
-                // Get browser audio devices
-                navigator.mediaDevices.enumerateDevices()
-                    .then(devices => {
-                        const audioInputs = devices.filter(d => d.kind === 'audioinput');
-                        setAudioDevices(audioInputs);
-                        if (audioInputs.length > 0) {
-                            setSelectedDevice(audioInputs[0].deviceId);
-                        }
-                    })
-                    .catch(err => console.log('Error getting devices:', err));
+                // Get browser audio devices (only available on HTTPS or localhost)
+                if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+                    navigator.mediaDevices.enumerateDevices()
+                        .then(devices => {
+                            const audioInputs = devices.filter(d => d.kind === 'audioinput');
+                            setAudioDevices(audioInputs);
+                            if (audioInputs.length > 0) {
+                                setSelectedDevice(audioInputs[0].deviceId);
+                            }
+                        })
+                        .catch(err => console.log('Error getting devices:', err));
+                } else {
+                    console.log('MediaDevices API not available (requires HTTPS)');
+                }
 
                 // Get Python microphones from server
                 fetch('/api/microphones')
