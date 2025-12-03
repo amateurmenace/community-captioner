@@ -50,10 +50,15 @@ caption_data = {
         "backgroundOpacity": 70,
         "textAlign": "center",
         "position": "bottom",
-        "maxLines": 2,
+        "maxLines": 1,
+        "maxWidth": 80,
         "showBackground": True,
         "textShadow": True,
-        "language": "en-US"
+        "language": "en-US",
+        "logoUrl": "",
+        "logoPosition": "bottom-right",
+        "logoSize": 100,
+        "logoOpacity": 100
     },
     "listening": False,
     "available_mics": [],
