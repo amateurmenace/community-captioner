@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Captioner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        :root {
+            --primary-green: #00A676;
+            --primary-green-dark: #008F66;
+            --primary-green-light: #E8F5F0;
+            --accent-purple: #9B59B6;
+            --accent-pink: #E91E8C;
+            --text-dark: #2D3748;
+            --text-medium: #4A5568;
+            --text-light: #718096;
+            --bg-light: #F7FAFC;
+            --white: #FFFFFF;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        body.overlay-mode {
+            background: transparent;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid #E2E8F0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-title {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: var(--text-light);
+            max-width: 200px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-green-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--text-dark);
+            border: 2px solid #E2E8F0;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+        }
+
+        .btn-accent {
+            background: var(--accent-pink);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background: #D1177D;
+        }
+
+        .btn-large {
+            padding: 14px 28px;
+            font-size: 16px;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            background: var(--primary-green);
+            padding: 16px 24px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+        }
+
+        .progress-bar h2 {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .progress-track {
+            background: rgba(255,255,255,0.3);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: white;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Workflow Steps */
+        .workflow-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .workflow-step {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .workflow-step:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-green-light);
+        }
+
+        .workflow-step.active {
+            border-color: var(--primary-green);
+        }
+
+        .step-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 16px;
+            background: var(--primary-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 24px;
+            height: 24px;
+            background: var(--accent-pink);
+            border-radius: 50%;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .step-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+
+        .step-desc {
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--bg-light);
+        }
+
+        .card-title {
+            font-size: 18px;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--primary-green);
+            border-radius: 2px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            transition: all 0.2s ease;
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(0, 166, 118, 0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%234A5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .form-range {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #E2E8F0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .form-range::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 4px rgba(0, 166, 118, 0.2);
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .color-input {
+            width: 50px;
+            height: 40px;
+            border: 2px solid #E2E8F0;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            padding: 2px;
+        }
+
+        .color-input::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-input::-webkit-color-swatch {
+            border: none;
+            border-radius: 4px;
+        }
+
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        /* Status Indicator */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .status-indicator.listening {
+            background: #DEF7EC;
+            color: #03543F;
+        }
+
+        .status-indicator.stopped {
+            background: #FDE8E8;
+            color: #9B1C1C;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.listening .status-dot {
+            background: #10B981;
+        }
+
+        .status-indicator.stopped .status-dot {
+            background: #EF4444;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* URL Box */
+        .url-box {
+            background: var(--bg-light);
+            border: 2px dashed #CBD5E0;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .url-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            color: var(--text-medium);
+        }
+
+        .url-box input:focus {
+            outline: none;
+        }
+
+        /* Preview Box */
+        .preview-container {
+            background: #1a1a2e;
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-label {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preview-text {
+            font-size: 24px;
+            color: white;
+            text-align: center;
+            max-width: 90%;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, #EBF4FF 0%, #E8F5F0 100%);
+            border-left: 4px solid var(--primary-green);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+
+        .info-box h4 {
+            color: var(--primary-green-dark);
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-box p {
+            color: var(--text-medium);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            margin: 8px 0 0 20px;
+            color: var(--text-medium);
+            font-size: 13px;
+        }
+
+        .info-box li {
+            margin-bottom: 4px;
+        }
+
+        /* Toggle Switch */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 52px;
+            height: 28px;
+            background: #CBD5E0;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle.active {
+            background: var(--primary-green);
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .toggle.active::after {
+            left: 27px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-light);
+            padding: 4px;
+            border-radius: var(--radius-md);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-sm);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-medium);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            background: var(--white);
+            color: var(--primary-green);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab:hover:not(.active) {
+            color: var(--text-dark);
+        }
+
+        /* Caption Overlay Styles */
+        .overlay-container {
+            width: 1920px;
+            height: 1080px;
+            position: relative;
+            background: transparent;
+        }
+
+        .caption-display {
+            position: absolute;
+            width: 100%;
+            padding: 20px 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .caption-text {
+            max-width: 90%;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .footer a {
+            color: var(--primary-green);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .workflow-steps {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .workflow-steps {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // Storage key for settings
+        const STORAGE_KEY = 'community-captioner-settings';
+        const CAPTION_KEY = 'community-captioner-caption';
+
+        // BroadcastChannel for cross-tab/OBS communication
+        const CHANNEL_NAME = 'community-captioner-channel';
+        let broadcastChannel = null;
+        try {
+            broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
+        } catch (e) {
+            console.log('BroadcastChannel not supported, using polling fallback');
+        }
+
+        // Default settings
+        const defaultSettings = {
+            fontSize: 48,
+            fontFamily: 'Open Sans',
+            textColor: '#FFFFFF',
+            backgroundColor: '#000000',
+            backgroundOpacity: 70,
+            textAlign: 'center',
+            position: 'bottom',
+            maxLines: 3,
+            showBackground: true,
+            textShadow: true,
+            language: 'en-US'
+        };
+
+        // Available fonts
+        const fonts = [
+            'Open Sans',
+            'Nunito',
+            'Arial',
+            'Verdana',
+            'Georgia',
+            'Times New Roman',
+            'Trebuchet MS',
+            'Courier New'
+        ];
+
+        // Available languages
+        const languages = [
+            { code: 'en-US', name: 'English (US)' },
+            { code: 'en-GB', name: 'English (UK)' },
+            { code: 'es-ES', name: 'Spanish (Spain)' },
+            { code: 'es-MX', name: 'Spanish (Mexico)' },
+            { code: 'fr-FR', name: 'French' },
+            { code: 'de-DE', name: 'German' },
+            { code: 'it-IT', name: 'Italian' },
+            { code: 'pt-BR', name: 'Portuguese (Brazil)' },
+            { code: 'zh-CN', name: 'Chinese (Simplified)' },
+            { code: 'ja-JP', name: 'Japanese' },
+            { code: 'ko-KR', name: 'Korean' }
+        ];
+
+        // Check if we're in overlay mode
+        const isOverlayMode = () => {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('overlay') === 'true';
+        };
+
+        // Caption Overlay Component
+        function CaptionOverlay() {
+            const [caption, setCaption] = useState('');
+            const [settings, setSettings] = useState(defaultSettings);
+
+            useEffect(() => {
+                document.body.classList.add('overlay-mode');
+
+                // Poll server for caption updates
+                const pollInterval = setInterval(async () => {
+                    try {
+                        const response = await fetch('/api/caption');
+                        const data = await response.json();
+                        setCaption(data.caption || '');
+                        if (data.settings && Object.keys(data.settings).length > 0) {
+                            setSettings(prev => ({ ...prev, ...data.settings }));
+                        }
+                    } catch (err) {
+                        console.log('Failed to fetch caption:', err);
+                    }
+                }, 100);
+
+                return () => {
+                    clearInterval(pollInterval);
+                    document.body.classList.remove('overlay-mode');
+                };
+            }, []);
+
+            const getBackgroundColor = () => {
+                if (!settings.showBackground) return 'transparent';
+                const hex = settings.backgroundColor;
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${settings.backgroundOpacity / 100})`;
+            };
+
+            const getPosition = () => {
+                switch (settings.position) {
+                    case 'top': return { top: '40px' };
+                    case 'middle': return { top: '50%', transform: 'translateY(-50%)' };
+                    case 'bottom': 
+                    default: return { bottom: '40px' };
+                }
+            };
+
+            const captionStyle = {
+                fontSize: `${settings.fontSize}px`,
+                fontFamily: settings.fontFamily,
+                color: settings.textColor,
+                backgroundColor: getBackgroundColor(),
+                textAlign: settings.textAlign,
+                padding: settings.showBackground ? '16px 32px' : '0',
+                borderRadius: '12px',
+                textShadow: settings.textShadow ? '2px 2px 4px rgba(0,0,0,0.8)' : 'none',
+                ...getPosition()
+            };
+
+            return (
+                <div className="overlay-container">
+                    <div className="caption-display" style={getPosition()}>
+                        <div className="caption-text" style={captionStyle}>
+                            {caption || ''}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Main Control Panel Component
+        function ControlPanel() {
+            const [settings, setSettings] = useState(defaultSettings);
+            const [isListening, setIsListening] = useState(false);
+            const [currentCaption, setCurrentCaption] = useState('');
+            const [interimCaption, setInterimCaption] = useState('');
+            const [activeTab, setActiveTab] = useState('appearance');
+            const recognitionRef = useRef(null);
+            const [overlayUrl, setOverlayUrl] = useState('');
+            const [audioDevices, setAudioDevices] = useState([]);
+            const [selectedDevice, setSelectedDevice] = useState('');
+            const [captionMode, setCaptionMode] = useState('python'); // 'python' or 'browser'
+            const [pythonMics, setPythonMics] = useState([]);
+            const [selectedPythonMic, setSelectedPythonMic] = useState(null);
+            const [pythonAvailable, setPythonAvailable] = useState(false);
+
+            useEffect(() => {
+                // Load saved settings
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    setSettings(JSON.parse(saved));
+                }
+
+                // Generate overlay URL
+                const baseUrl = window.location.protocol === 'file:'
+                    ? 'http://localhost:8080'
+                    : `${window.location.origin}${window.location.pathname}`;
+                const url = `${baseUrl}?overlay=true`;
+                setOverlayUrl(url);
+
+                // Get browser audio devices
+                navigator.mediaDevices.enumerateDevices()
+                    .then(devices => {
+                        const audioInputs = devices.filter(d => d.kind === 'audioinput');
+                        setAudioDevices(audioInputs);
+                        if (audioInputs.length > 0) {
+                            setSelectedDevice(audioInputs[0].deviceId);
+                        }
+                    })
+                    .catch(err => console.log('Error getting devices:', err));
+
+                // Get Python microphones from server
+                fetch('/api/microphones')
+                    .then(res => res.json())
+                    .then(data => {
+                        setPythonMics(data.microphones || []);
+                        setPythonAvailable(data.speech_available);
+                        if (data.microphones && data.microphones.length > 0) {
+                            setSelectedPythonMic(data.microphones[0].index);
+                        }
+                        // Default to python mode if available
+                        // Default to browser mode - it's faster (real-time streaming)
+                        // Python mode is available but has more lag
+                        setCaptionMode('browser');
+                    })
+                    .catch(err => {
+                        console.log('Python speech not available:', err);
+                        setCaptionMode('browser');
+                    });
+
+                // Poll for server-side caption updates when in Python mode
+                const pollInterval = setInterval(() => {
+                    fetch('/api/caption')
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.mode === 'python' && data.listening) {
+                                setCurrentCaption(data.caption || '');
+                                setIsListening(data.listening);
+                            }
+                        })
+                        .catch(() => {});
+                }, 200);
+
+                return () => clearInterval(pollInterval);
+            }, []);
+
+            // Save settings whenever they change
+            useEffect(() => {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+                // Also send to server for OBS overlay
+                fetch('/api/caption', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ settings })
+                }).catch(err => console.log('Failed to sync settings:', err));
+            }, [settings]);
+
+            // Save caption for overlay
+            useEffect(() => {
+                const displayText = interimCaption || currentCaption;
+                localStorage.setItem(CAPTION_KEY, displayText);
+                // Also send to server for OBS overlay
+                fetch('/api/caption', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ caption: displayText })
+                }).catch(err => console.log('Failed to sync caption:', err));
+            }, [currentCaption, interimCaption]);
+
+            const updateSetting = (key, value) => {
+                setSettings(prev => ({ ...prev, [key]: value }));
+            };
+
+            const startListening = async () => {
+                // Python mode - use server-side speech recognition
+                if (captionMode === 'python') {
+                    try {
+                        const response = await fetch('/api/start', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ mic_index: selectedPythonMic })
+                        });
+                        const data = await response.json();
+                        if (data.status === 'started') {
+                            setIsListening(true);
+                            setCurrentCaption('');
+                        }
+                    } catch (err) {
+                        alert('Failed to start Python speech recognition. Check the terminal for errors.');
+                    }
+                    return;
+                }
+
+                // Browser mode - use Web Speech API
+                if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                    alert('Speech recognition is not supported in this browser. Please use Chrome or Edge.');
+                    return;
+                }
+
+                // Request microphone permission with specific device
+                try {
+                    const constraints = {
+                        audio: selectedDevice ? { deviceId: { exact: selectedDevice } } : true
+                    };
+                    await navigator.mediaDevices.getUserMedia(constraints);
+                } catch (err) {
+                    alert('Please allow microphone access to use captions.');
+                    return;
+                }
+
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = settings.language;
+
+                // Helper to limit text to approximate line count based on character length
+                const limitToLines = (text, maxLines) => {
+                    // Approximate 60 chars per line at typical font size
+                    const charsPerLine = 60;
+                    const maxChars = maxLines * charsPerLine;
+
+                    if (text.length <= maxChars) return text;
+
+                    // Trim from the beginning, try to break at word boundary
+                    const trimmed = text.slice(-maxChars);
+                    const firstSpace = trimmed.indexOf(' ');
+                    return firstSpace > 0 ? trimmed.slice(firstSpace + 1) : trimmed;
+                };
+
+                recognition.onresult = (event) => {
+                    let interim = '';
+                    let final = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            final += transcript;
+                        } else {
+                            interim += transcript;
+                        }
+                    }
+
+                    if (final) {
+                        setCurrentCaption(prev => {
+                            const combined = (prev + ' ' + final).trim();
+                            return limitToLines(combined, settings.maxLines);
+                        });
+                        setInterimCaption('');
+                    } else {
+                        // Also limit interim captions to prevent overflow
+                        setInterimCaption(limitToLines(interim, settings.maxLines));
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    if (event.error === 'not-allowed') {
+                        alert('Microphone access was denied. Please allow access and try again.');
+                    }
+                };
+
+                recognition.onend = () => {
+                    if (isListening) {
+                        recognition.start();
+                    }
+                };
+
+                recognitionRef.current = recognition;
+                recognition.start();
+                setIsListening(true);
+            };
+
+            const stopListening = async () => {
+                // Python mode - stop server-side recognition
+                if (captionMode === 'python') {
+                    try {
+                        await fetch('/api/stop', { method: 'POST' });
+                    } catch (err) {
+                        console.log('Failed to stop Python recognition:', err);
+                    }
+                }
+
+                // Browser mode - stop Web Speech API
+                if (recognitionRef.current) {
+                    recognitionRef.current.stop();
+                    recognitionRef.current = null;
+                }
+                setIsListening(false);
+            };
+
+            const clearCaptions = async () => {
+                setCurrentCaption('');
+                setInterimCaption('');
+                localStorage.setItem(CAPTION_KEY, '');
+                // Also clear on server
+                try {
+                    await fetch('/api/clear', { method: 'POST' });
+                } catch (err) {
+                    console.log('Failed to clear server captions:', err);
+                }
+            };
+
+            const copyOverlayUrl = () => {
+                navigator.clipboard.writeText(overlayUrl);
+                alert('Overlay URL copied to clipboard!');
+            };
+
+            const openOverlay = () => {
+                window.open(overlayUrl, '_blank', 'width=1920,height=1080');
+            };
+
+            const popOutControlPanel = () => {
+                window.open(
+                    window.location.href,
+                    'CaptionerControl',
+                    'width=800,height=900,menubar=no,toolbar=no,location=no,status=no'
+                );
+            };
+
+            const getPreviewBackground = () => {
+                if (!settings.showBackground) return 'transparent';
+                const hex = settings.backgroundColor;
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${settings.backgroundOpacity / 100})`;
+            };
+
+            return (
+                <div>
+                    {/* Header */}
+                    <header className="header">
+                        <div className="logo">
+                            <div className="logo-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                    <line x1="9" y1="10" x2="15" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div className="logo-text">
+                                <span className="logo-title">COMMUNITY CAPTIONER</span>
+                                <span className="logo-subtitle">Free live captions for community media</span>
+                            </div>
+                        </div>
+                        <div className="header-actions">
+                            <div className={`status-indicator ${isListening ? 'listening' : 'stopped'}`}>
+                                <span className="status-dot"></span>
+                                {isListening ? 'Listening' : 'Stopped'}
+                            </div>
+                            <button className="btn btn-secondary" onClick={popOutControlPanel} title="Pop out to separate window to keep mic active">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                                </svg>
+                                Pop Out
+                            </button>
+                            <button className="btn btn-secondary" onClick={openOverlay}>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                                Open Overlay
+                            </button>
+                            <button className="btn btn-accent" onClick={() => window.open('https://github.com/community-media', '_blank')}>
+                                Give Feedback
+                            </button>
+                        </div>
+                    </header>
+
+                    <main className="main-container">
+                        {/* Progress Bar */}
+                        <div className="progress-bar">
+                            <h2>🎤 Getting Started with Community Captioner</h2>
+                            <div className="progress-track">
+                                <div className="progress-fill" style={{ width: isListening ? '100%' : '25%' }}></div>
+                            </div>
+                        </div>
+
+                        {/* Workflow Steps */}
+                        <div className="workflow-steps">
+                            <div className="workflow-step active">
+                                <div className="step-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                                    </svg>
+                                </div>
+                                <h3 className="step-title">Select Audio Source</h3>
+                                <p className="step-desc">Choose your audio input device from capture card or mixer</p>
+                            </div>
+                            <div className="workflow-step">
+                                <div className="step-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                    </svg>
+                                </div>
+                                <h3 className="step-title">Customize Appearance</h3>
+                                <p className="step-desc">Set font, colors, size, and position to match your stream</p>
+                            </div>
+                            <div className="workflow-step">
+                                <div className="step-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                    </svg>
+                                </div>
+                                <h3 className="step-title">Copy Overlay URL</h3>
+                                <p className="step-desc">Add the URL to OBS or your video switcher as a browser source</p>
+                            </div>
+                            <div className="workflow-step">
+                                <div className="step-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                    </svg>
+                                </div>
+                                <h3 className="step-title">Start Captioning</h3>
+                                <p className="step-desc">Click Start and watch live captions appear on your stream</p>
+                            </div>
+                        </div>
+
+                        <div className="grid-2">
+                            {/* Left Column - Controls */}
+                            <div>
+                                {/* Audio Source Card */}
+                                <div className="card">
+                                    <div className="card-header">
+                                        <h3 className="card-title">Audio Source</h3>
+                                    </div>
+
+                                    {/* Recognition Mode Toggle */}
+                                    <div className="form-group">
+                                        <label className="form-label">Recognition Mode</label>
+                                        <div className="tabs" style={{ marginBottom: '0' }}>
+                                            <button
+                                                className={`tab ${captionMode === 'browser' ? 'active' : ''}`}
+                                                onClick={() => setCaptionMode('browser')}
+                                                title="Real-time streaming - fastest response"
+                                            >
+                                                Browser (Fastest)
+                                            </button>
+                                            <button
+                                                className={`tab ${captionMode === 'python' ? 'active' : ''}`}
+                                                onClick={() => setCaptionMode('python')}
+                                                disabled={!pythonAvailable}
+                                                title={pythonAvailable ? 'Works when browser loses focus, but has more lag' : 'Python speech recognition not available'}
+                                            >
+                                                Server (Background)
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {captionMode === 'python' && pythonAvailable && (
+                                        <div className="info-box" style={{ background: '#FEF3C7', borderColor: '#F59E0B', marginTop: '12px' }}>
+                                            <h4 style={{ color: '#92400E' }}>Server Mode (Slower)</h4>
+                                            <p style={{ color: '#A16207' }}>Works when browser loses focus, but has 2-5 second delay. Use Browser mode for real-time captions.</p>
+                                        </div>
+                                    )}
+
+                                    {captionMode === 'python' && !pythonAvailable && (
+                                        <div className="info-box" style={{ background: '#FEF3C7', borderColor: '#F59E0B', marginTop: '12px' }}>
+                                            <h4 style={{ color: '#92400E' }}>Python Not Available</h4>
+                                            <p style={{ color: '#A16207' }}>Install with: pip3 install SpeechRecognition pyaudio</p>
+                                        </div>
+                                    )}
+
+                                    <div className="form-group">
+                                        <label className="form-label">Input Device</label>
+                                        {captionMode === 'python' ? (
+                                            <select
+                                                className="form-input form-select"
+                                                value={selectedPythonMic || ''}
+                                                onChange={(e) => setSelectedPythonMic(parseInt(e.target.value))}
+                                            >
+                                                {pythonMics.map(mic => (
+                                                    <option key={mic.index} value={mic.index}>
+                                                        {mic.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <select
+                                                className="form-input form-select"
+                                                value={selectedDevice}
+                                                onChange={(e) => setSelectedDevice(e.target.value)}
+                                            >
+                                                {audioDevices.map(device => (
+                                                    <option key={device.deviceId} value={device.deviceId}>
+                                                        {device.label || `Microphone ${device.deviceId.slice(0, 8)}`}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        )}
+                                    </div>
+
+                                    {captionMode === 'browser' && (
+                                        <div className="form-group">
+                                            <label className="form-label">Recognition Language</label>
+                                            <select
+                                                className="form-input form-select"
+                                                value={settings.language}
+                                                onChange={(e) => updateSetting('language', e.target.value)}
+                                            >
+                                                {languages.map(lang => (
+                                                    <option key={lang.code} value={lang.code}>{lang.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                                        {!isListening ? (
+                                            <button className="btn btn-primary btn-large" onClick={startListening} style={{ flex: 1 }}>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                                </svg>
+                                                Start Captioning
+                                            </button>
+                                        ) : (
+                                            <button className="btn btn-accent btn-large" onClick={stopListening} style={{ flex: 1 }}>
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <rect x="6" y="6" width="12" height="12"></rect>
+                                                </svg>
+                                                Stop Captioning
+                                            </button>
+                                        )}
+                                        <button className="btn btn-secondary btn-large" onClick={clearCaptions}>
+                                            Clear
+                                        </button>
+                                    </div>
+
+                                    {captionMode === 'browser' && (
+                                        <div className="info-box">
+                                            <h4>Warning: Browser Mode Limitations</h4>
+                                            <p>The microphone may pause when you switch apps. Use Server mode for uninterrupted captioning.</p>
+                                        </div>
+                                    )}
+
+                                    <div className="info-box">
+                                        <h4>🎧 Using External Audio Sources</h4>
+                                        <p>To caption audio from a video switcher or mixer:</p>
+                                        <ul>
+                                            <li><strong>Blackmagic UltraStudio:</strong> Install Desktop Video drivers, select the device above</li>
+                                            <li><strong>Capture Cards:</strong> Your capture card should appear as an audio input device</li>
+                                            <li><strong>Virtual Audio:</strong> Use software like VB-Audio or Loopback to route audio</li>
+                                            <li><strong>Mixer Output:</strong> Connect a USB audio interface to your mixer's output</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {/* Appearance Settings Card */}
+                                <div className="card">
+                                    <div className="card-header">
+                                        <h3 className="card-title">Caption Appearance</h3>
+                                    </div>
+
+                                    <div className="tabs">
+                                        <button 
+                                            className={`tab ${activeTab === 'appearance' ? 'active' : ''}`}
+                                            onClick={() => setActiveTab('appearance')}
+                                        >
+                                            Style
+                                        </button>
+                                        <button 
+                                            className={`tab ${activeTab === 'position' ? 'active' : ''}`}
+                                            onClick={() => setActiveTab('position')}
+                                        >
+                                            Position
+                                        </button>
+                                        <button 
+                                            className={`tab ${activeTab === 'advanced' ? 'active' : ''}`}
+                                            onClick={() => setActiveTab('advanced')}
+                                        >
+                                            Advanced
+                                        </button>
+                                    </div>
+
+                                    {activeTab === 'appearance' && (
+                                        <>
+                                            <div className="form-group">
+                                                <label className="form-label">Font Size: {settings.fontSize}px</label>
+                                                <input 
+                                                    type="range" 
+                                                    className="form-range"
+                                                    min="24" 
+                                                    max="96" 
+                                                    value={settings.fontSize}
+                                                    onChange={(e) => updateSetting('fontSize', parseInt(e.target.value))}
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label className="form-label">Font Family</label>
+                                                <select 
+                                                    className="form-input form-select"
+                                                    value={settings.fontFamily}
+                                                    onChange={(e) => updateSetting('fontFamily', e.target.value)}
+                                                >
+                                                    {fonts.map(font => (
+                                                        <option key={font} value={font}>{font}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div className="grid-2">
+                                                <div className="form-group">
+                                                    <label className="form-label">Text Color</label>
+                                                    <div className="color-input-wrapper">
+                                                        <input 
+                                                            type="color" 
+                                                            className="color-input"
+                                                            value={settings.textColor}
+                                                            onChange={(e) => updateSetting('textColor', e.target.value)}
+                                                        />
+                                                        <input 
+                                                            type="text" 
+                                                            className="form-input"
+                                                            value={settings.textColor}
+                                                            onChange={(e) => updateSetting('textColor', e.target.value)}
+                                                            style={{ flex: 1 }}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="form-group">
+                                                    <label className="form-label">Background Color</label>
+                                                    <div className="color-input-wrapper">
+                                                        <input 
+                                                            type="color" 
+                                                            className="color-input"
+                                                            value={settings.backgroundColor}
+                                                            onChange={(e) => updateSetting('backgroundColor', e.target.value)}
+                                                        />
+                                                        <input 
+                                                            type="text" 
+                                                            className="form-input"
+                                                            value={settings.backgroundColor}
+                                                            onChange={(e) => updateSetting('backgroundColor', e.target.value)}
+                                                            style={{ flex: 1 }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label className="form-label">Background Opacity: {settings.backgroundOpacity}%</label>
+                                                <input 
+                                                    type="range" 
+                                                    className="form-range"
+                                                    min="0" 
+                                                    max="100" 
+                                                    value={settings.backgroundOpacity}
+                                                    onChange={(e) => updateSetting('backgroundOpacity', parseInt(e.target.value))}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {activeTab === 'position' && (
+                                        <>
+                                            <div className="form-group">
+                                                <label className="form-label">Vertical Position</label>
+                                                <div className="grid-3">
+                                                    {['top', 'middle', 'bottom'].map(pos => (
+                                                        <button 
+                                                            key={pos}
+                                                            className={`btn ${settings.position === pos ? 'btn-primary' : 'btn-secondary'}`}
+                                                            onClick={() => updateSetting('position', pos)}
+                                                        >
+                                                            {pos.charAt(0).toUpperCase() + pos.slice(1)}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <label className="form-label">Text Alignment</label>
+                                                <div className="grid-3">
+                                                    {['left', 'center', 'right'].map(align => (
+                                                        <button 
+                                                            key={align}
+                                                            className={`btn ${settings.textAlign === align ? 'btn-primary' : 'btn-secondary'}`}
+                                                            onClick={() => updateSetting('textAlign', align)}
+                                                        >
+                                                            {align.charAt(0).toUpperCase() + align.slice(1)}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    {activeTab === 'advanced' && (
+                                        <>
+                                            <div className="form-group">
+                                                <label className="form-label">Maximum Lines: {settings.maxLines}</label>
+                                                <input 
+                                                    type="range" 
+                                                    className="form-range"
+                                                    min="1" 
+                                                    max="6" 
+                                                    value={settings.maxLines}
+                                                    onChange={(e) => updateSetting('maxLines', parseInt(e.target.value))}
+                                                />
+                                            </div>
+
+                                            <div className="form-group">
+                                                <div className="toggle-wrapper">
+                                                    <div 
+                                                        className={`toggle ${settings.showBackground ? 'active' : ''}`}
+                                                        onClick={() => updateSetting('showBackground', !settings.showBackground)}
+                                                    ></div>
+                                                    <span className="form-label" style={{ marginBottom: 0 }}>Show Background</span>
+                                                </div>
+                                            </div>
+
+                                            <div className="form-group">
+                                                <div className="toggle-wrapper">
+                                                    <div 
+                                                        className={`toggle ${settings.textShadow ? 'active' : ''}`}
+                                                        onClick={() => updateSetting('textShadow', !settings.textShadow)}
+                                                    ></div>
+                                                    <span className="form-label" style={{ marginBottom: 0 }}>Text Shadow</span>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Right Column - Preview & URL */}
+                            <div>
+                                {/* Preview Card */}
+                                <div className="card">
+                                    <div className="card-header">
+                                        <h3 className="card-title">Live Preview</h3>
+                                    </div>
+
+                                    <div className="preview-container">
+                                        <span className="preview-label">1920 × 1080 Preview</span>
+                                        <div 
+                                            className="preview-text"
+                                            style={{
+                                                fontSize: `${Math.min(settings.fontSize * 0.5, 32)}px`,
+                                                fontFamily: settings.fontFamily,
+                                                color: settings.textColor,
+                                                backgroundColor: getPreviewBackground(),
+                                                textAlign: settings.textAlign,
+                                                padding: settings.showBackground ? '12px 24px' : '0',
+                                                borderRadius: '8px',
+                                                textShadow: settings.textShadow ? '2px 2px 4px rgba(0,0,0,0.8)' : 'none',
+                                                maxWidth: '90%'
+                                            }}
+                                        >
+                                            {interimCaption || currentCaption || 'Captions will appear here...'}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Overlay URL Card */}
+                                <div className="card">
+                                    <div className="card-header">
+                                        <h3 className="card-title">Overlay URL</h3>
+                                    </div>
+
+                                    <p style={{ color: 'var(--text-medium)', fontSize: '14px', marginBottom: '12px' }}>
+                                        Copy this URL and add it as a Browser Source in OBS Studio or your video switcher software.
+                                    </p>
+
+                                    <div className="url-box">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" strokeWidth="2">
+                                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                        </svg>
+                                        <input type="text" value={overlayUrl} readOnly />
+                                        <button className="btn btn-primary" onClick={copyOverlayUrl}>
+                                            Copy
+                                        </button>
+                                    </div>
+
+                                    <div className="info-box">
+                                        <h4>📺 OBS Studio Setup</h4>
+                                        <ul>
+                                            <li><strong>Important:</strong> Run the included <code>start-server.py</code> script first!</li>
+                                            <li>Add a new <strong>Browser Source</strong></li>
+                                            <li>Set URL to: <code>http://localhost:8080?overlay=true</code></li>
+                                            <li>Set dimensions to <strong>1920 × 1080</strong></li>
+                                            <li>Check <strong>"Shutdown source when not visible"</strong> to save resources</li>
+                                            <li>Position the source where you want captions</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="info-box">
+                                        <h4>🎬 Video Switcher Setup</h4>
+                                        <p>For hardware switchers like Blackmagic ATEM:</p>
+                                        <ul>
+                                            <li>Use ATEM's built-in browser source if available</li>
+                                            <li>Or route through OBS and use NDI/SDI output</li>
+                                            <li>Some switchers support HTML overlays via connected computers</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {/* Current Caption Card */}
+                                <div className="card">
+                                    <div className="card-header">
+                                        <h3 className="card-title">Current Caption</h3>
+                                        <button className="btn btn-secondary" onClick={clearCaptions}>
+                                            Clear
+                                        </button>
+                                    </div>
+                                    <div style={{ 
+                                        background: 'var(--bg-light)', 
+                                        padding: '16px', 
+                                        borderRadius: 'var(--radius-md)',
+                                        minHeight: '80px',
+                                        fontFamily: 'var(--font-family)',
+                                        fontSize: '16px',
+                                        color: 'var(--text-dark)'
+                                    }}>
+                                        <span>{currentCaption}</span>
+                                        <span style={{ color: 'var(--text-light)' }}>{interimCaption}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+
+                    <footer className="footer">
+                        <p>
+                            Community Captioner is free and open source. 
+                            Made with ❤️ for community media centers everywhere.
+                            <br />
+                            Part of the <a href="#">Community Media Tools</a> project.
+                        </p>
+                    </footer>
+                </div>
+            );
+        }
+
+        // Warning Banner for file:// protocol
+        function FileProtocolWarning() {
+            const [dismissed, setDismissed] = useState(false);
+            
+            if (dismissed || window.location.protocol !== 'file:') {
+                return null;
+            }
+
+            return (
+                <div style={{
+                    background: 'linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)',
+                    borderBottom: '3px solid #F59E0B',
+                    padding: '16px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px'
+                }}>
+                    <span style={{ fontSize: '24px' }}>⚠️</span>
+                    <div style={{ flex: 1 }}>
+                        <strong style={{ color: '#92400E', display: 'block', marginBottom: '4px' }}>
+                            Running from a local file - OBS overlay won't work!
+                        </strong>
+                        <span style={{ color: '#A16207', fontSize: '14px' }}>
+                            To use the overlay in OBS, you need to run a local web server. 
+                            Use the included <code style={{ background: 'rgba(0,0,0,0.1)', padding: '2px 6px', borderRadius: '4px' }}>start-server.py</code> script, 
+                            then use <code style={{ background: 'rgba(0,0,0,0.1)', padding: '2px 6px', borderRadius: '4px' }}>http://localhost:8080?overlay=true</code> in OBS.
+                        </span>
+                    </div>
+                    <button 
+                        onClick={() => setDismissed(true)}
+                        style={{
+                            background: '#F59E0B',
+                            border: 'none',
+                            color: 'white',
+                            padding: '8px 16px',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            fontWeight: '600'
+                        }}
+                    >
+                        Dismiss
+                    </button>
+                </div>
+            );
+        }
+
+        // Main App Component
+        function App() {
+            if (isOverlayMode()) {
+                return <CaptionOverlay />;
+            }
+            return (
+                <>
+                    <FileProtocolWarning />
+                    <ControlPanel />
+                </>
+            );
+        }
+
+        // Render the app
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
