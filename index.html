@@ -679,6 +679,14 @@
         // Storage key for settings
         const STORAGE_KEY = 'community-captioner-settings';
         const CAPTION_KEY = 'community-captioner-caption';
+        const REMOTE_SERVER_KEY = 'community-captioner-remote-server';
+
+        // Remote server URL (for cloud deployment)
+        // Set this to your droplet IP to sync captions to OBS on a different machine
+        const getRemoteServer = () => {
+            const saved = localStorage.getItem(REMOTE_SERVER_KEY);
+            return saved || '';
+        };
 
         // BroadcastChannel for cross-tab/OBS communication
         const CHANNEL_NAME = 'community-captioner-channel';
@@ -821,6 +829,8 @@
             const [pythonMics, setPythonMics] = useState([]);
             const [selectedPythonMic, setSelectedPythonMic] = useState(null);
             const [pythonAvailable, setPythonAvailable] = useState(false);
+            const [remoteServer, setRemoteServer] = useState(getRemoteServer());
+            const [remoteConnected, setRemoteConnected] = useState(false);
 
             useEffect(() => {
                 // Load saved settings
@@ -901,13 +911,27 @@
             useEffect(() => {
                 const displayText = interimCaption || currentCaption;
                 localStorage.setItem(CAPTION_KEY, displayText);
-                // Also send to server for OBS overlay
+                // Send to local server
                 fetch('/api/caption', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ caption: displayText })
-                }).catch(err => console.log('Failed to sync caption:', err));
-            }, [currentCaption, interimCaption]);
+                }).catch(err => console.log('Failed to sync caption locally:', err));
+
+                // Also send to remote server if configured
+                if (remoteServer) {
+                    fetch(`${remoteServer}/api/caption`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ caption: displayText, settings })
+                    })
+                    .then(() => setRemoteConnected(true))
+                    .catch(err => {
+                        console.log('Failed to sync caption to remote:', err);
+                        setRemoteConnected(false);
+                    });
+                }
+            }, [currentCaption, interimCaption, remoteServer, settings]);
 
             const updateSetting = (key, value) => {
                 setSettings(prev => ({ ...prev, [key]: value }));
@@ -1504,14 +1528,57 @@
                                     </div>
                                 </div>
 
-                                {/* Overlay URL Card */}
+                                {/* Remote Server Card */}
                                 <div className="card">
                                     <div className="card-header">
-                                        <h3 className="card-title">Overlay URL</h3>
+                                        <h3 className="card-title">Remote Server (Cloud)</h3>
+                                        {remoteServer && (
+                                            <div className={`status-indicator ${remoteConnected ? 'listening' : 'stopped'}`}>
+                                                <span className="status-dot"></span>
+                                                {remoteConnected ? 'Connected' : 'Disconnected'}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <p style={{ color: 'var(--text-medium)', fontSize: '14px', marginBottom: '12px' }}>
-                                        Copy this URL and add it as a Browser Source in OBS Studio or your video switcher software.
+                                        For OBS on a different machine, enter your cloud server URL to sync captions remotely.
+                                    </p>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Cloud Server URL</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            placeholder="http://138.197.15.64:8080"
+                                            value={remoteServer}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setRemoteServer(val);
+                                                localStorage.setItem(REMOTE_SERVER_KEY, val);
+                                            }}
+                                        />
+                                    </div>
+
+                                    {remoteServer && (
+                                        <div className="info-box" style={{ background: remoteConnected ? '#DEF7EC' : '#FEF3C7', borderColor: remoteConnected ? '#10B981' : '#F59E0B' }}>
+                                            <h4 style={{ color: remoteConnected ? '#03543F' : '#92400E' }}>
+                                                {remoteConnected ? 'Syncing to cloud server' : 'Enter URL and start captioning to test connection'}
+                                            </h4>
+                                            <p style={{ color: remoteConnected ? '#047857' : '#A16207' }}>
+                                                OBS Overlay URL: <code>{remoteServer}/overlay.html</code>
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Overlay URL Card */}
+                                <div className="card">
+                                    <div className="card-header">
+                                        <h3 className="card-title">Local Overlay URL</h3>
+                                    </div>
+
+                                    <p style={{ color: 'var(--text-medium)', fontSize: '14px', marginBottom: '12px' }}>
+                                        For OBS on the same machine, use this local URL.
                                     </p>
 
                                     <div className="url-box">
