@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Captioner - Download</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-light: #252542;
+            --primary-green: #00A676;
+            --primary-green-hover: #00c78a;
+            --text-white: #FFFFFF;
+            --text-light: #9CA3AF;
+            --text-medium: #D1D5DB;
+            --accent-red: #EF4444;
+            --accent-yellow: #F59E0B;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', 'Open Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-white);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--primary-green), #00d4aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid var(--bg-light);
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .step-number {
+            background: var(--primary-green);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .card p {
+            color: var(--text-medium);
+            margin-bottom: 16px;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--primary-green);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .download-btn:hover {
+            background: var(--primary-green-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 166, 118, 0.3);
+        }
+
+        .download-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .code-block {
+            background: #0d0d14;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+            color: #10B981;
+            overflow-x: auto;
+            margin: 16px 0;
+            border: 1px solid var(--bg-light);
+        }
+
+        .code-block .comment {
+            color: #6B7280;
+        }
+
+        .requirements {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .req-item {
+            background: var(--bg-light);
+            padding: 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .req-icon {
+            font-size: 24px;
+        }
+
+        .req-text {
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: rgba(0, 166, 118, 0.1);
+            border: 1px solid var(--primary-green);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .info-box h4 {
+            color: var(--primary-green);
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+
+        .overlay-url-section {
+            background: var(--bg-light);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+
+        .overlay-url-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .url-display {
+            display: flex;
+            gap: 8px;
+        }
+
+        .url-display input {
+            flex: 1;
+            background: var(--bg-dark);
+            border: 1px solid var(--bg-light);
+            border-radius: 8px;
+            padding: 12px 16px;
+            color: var(--text-white);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 14px;
+        }
+
+        .copy-btn {
+            background: var(--primary-green);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-green-hover);
+        }
+
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .warning-box h4 {
+            color: var(--accent-red);
+            margin-bottom: 8px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: var(--primary-green);
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 28px;
+            }
+            .card {
+                padding: 24px;
+            }
+            .download-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">CC</div>
+            <h1>Community Captioner</h1>
+            <p class="subtitle">Free, open-source live captions for OBS. Speech recognition runs locally on your machine for privacy and low latency.</p>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">
+                <span class="step-number">1</span>
+                Download the App
+            </h2>
+            <p>Download the Community Captioner app and extract it to any folder on your computer.</p>
+
+            <a href="/download/community-captioner.zip" class="download-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download for Mac/Windows/Linux
+            </a>
+
+            <div class="requirements">
+                <div class="req-item">
+                    <span class="req-icon">🐍</span>
+                    <span class="req-text">Python 3.8+</span>
+                </div>
+                <div class="req-item">
+                    <span class="req-icon">🎤</span>
+                    <span class="req-text">Microphone</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">
+                <span class="step-number">2</span>
+                Install Dependencies
+            </h2>
+            <p>Open Terminal (Mac/Linux) or Command Prompt (Windows) and run:</p>
+
+            <div class="code-block">
+                <span class="comment"># Install required Python packages</span><br>
+                pip3 install SpeechRecognition pyaudio
+            </div>
+
+            <div class="warning-box">
+                <h4>Mac Users</h4>
+                <p>If pyaudio fails to install, first run: <code>brew install portaudio</code></p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">
+                <span class="step-number">3</span>
+                Run the App
+            </h2>
+            <p>Navigate to the extracted folder and run the start script:</p>
+
+            <div class="code-block">
+                <span class="comment"># Navigate to the folder</span><br>
+                cd community-captioner<br><br>
+                <span class="comment"># Start the captioner</span><br>
+                python3 start-server.py
+            </div>
+
+            <p>This will open the control panel in your browser at <code>http://localhost:8080</code></p>
+
+            <div class="info-box">
+                <h4>Connect to Cloud Server</h4>
+                <p>In the control panel, enter this URL in the "Remote Server" field to sync captions to your OBS overlay:</p>
+                <div class="code-block" style="margin-bottom: 0;">http://138.197.15.64:8080</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">
+                <span class="step-number">4</span>
+                Add to OBS
+            </h2>
+            <p>In OBS Studio, add a Browser Source with these settings:</p>
+
+            <div class="overlay-url-section">
+                <label>Overlay URL (copy this):</label>
+                <div class="url-display">
+                    <input type="text" id="overlayUrl" value="http://138.197.15.64:8080/overlay.html" readonly>
+                    <button class="copy-btn" onclick="copyUrl()">Copy</button>
+                </div>
+            </div>
+
+            <div class="requirements" style="margin-top: 16px;">
+                <div class="req-item">
+                    <span class="req-icon">📐</span>
+                    <span class="req-text">Width: 1920</span>
+                </div>
+                <div class="req-item">
+                    <span class="req-icon">📐</span>
+                    <span class="req-text">Height: 1080</span>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>That's it!</h4>
+                <p>Start speaking and your captions will appear in OBS. Use the local control panel to customize fonts, colors, position, and add a logo overlay.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Open source on <a href="https://github.com/amateurmenace/community-captioner" target="_blank">GitHub</a></p>
+    </div>
+
+    <script>
+        function copyUrl() {
+            const input = document.getElementById('overlayUrl');
+            input.select();
+            document.execCommand('copy');
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+    </script>
+</body>
+</html>
