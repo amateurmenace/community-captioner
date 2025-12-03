@@ -682,10 +682,13 @@
         const REMOTE_SERVER_KEY = 'community-captioner-remote-server';
 
         // Remote server URL (for cloud deployment)
-        // Set this to your droplet IP to sync captions to OBS on a different machine
+        // Pre-filled with cloud server URL - users can clear if not needed
+        const DEFAULT_REMOTE_SERVER = 'http://138.197.15.64:8080';
         const getRemoteServer = () => {
             const saved = localStorage.getItem(REMOTE_SERVER_KEY);
-            return saved || '';
+            // If never set, return default; if explicitly cleared, return empty
+            if (saved === null) return DEFAULT_REMOTE_SERVER;
+            return saved;
         };
 
         // BroadcastChannel for cross-tab/OBS communication
@@ -1638,23 +1641,50 @@
                                     </div>
                                 </div>
 
-                                {/* Remote Server Card */}
+                                {/* OBS Overlay URLs Card */}
                                 <div className="card">
                                     <div className="card-header">
-                                        <h3 className="card-title">Remote Server (Cloud)</h3>
+                                        <h3 className="card-title">OBS Overlay URLs</h3>
                                         {remoteServer && (
                                             <div className={`status-indicator ${remoteConnected ? 'listening' : 'stopped'}`}>
                                                 <span className="status-dot"></span>
-                                                {remoteConnected ? 'Connected' : 'Disconnected'}
+                                                {remoteConnected ? 'Cloud Connected' : 'Cloud Disconnected'}
                                             </div>
                                         )}
                                     </div>
 
-                                    <p style={{ color: 'var(--text-medium)', fontSize: '14px', marginBottom: '12px' }}>
-                                        For OBS on a different machine, enter your cloud server URL to sync captions remotely.
-                                    </p>
+                                    {/* Cloud Overlay - Primary */}
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <label className="form-label" style={{ color: 'var(--primary-green)', fontWeight: '700' }}>
+                                            Cloud Overlay (Use this in OBS)
+                                        </label>
+                                        <p style={{ color: 'var(--text-medium)', fontSize: '13px', marginBottom: '8px' }}>
+                                            Works from anywhere - use this URL in OBS on any machine:
+                                        </p>
+                                        <div className="url-box">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-green)" strokeWidth="2">
+                                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                                            </svg>
+                                            <input
+                                                type="text"
+                                                value={remoteServer ? `${remoteServer}/overlay.html` : 'Enter cloud server URL below'}
+                                                readOnly
+                                                style={{ color: remoteServer ? 'var(--text-white)' : 'var(--text-light)' }}
+                                            />
+                                            <button
+                                                className="btn btn-primary"
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(`${remoteServer}/overlay.html`);
+                                                }}
+                                                disabled={!remoteServer}
+                                            >
+                                                Copy
+                                            </button>
+                                        </div>
+                                    </div>
 
-                                    <div className="form-group">
+                                    {/* Cloud Server URL Input */}
+                                    <div className="form-group" style={{ marginBottom: '20px' }}>
                                         <label className="form-label">Cloud Server URL</label>
                                         <input
                                             type="text"
@@ -1667,50 +1697,36 @@
                                                 localStorage.setItem(REMOTE_SERVER_KEY, val);
                                             }}
                                         />
+                                        <small style={{ color: 'var(--text-light)', fontSize: '12px' }}>
+                                            Captions are synced to this server for remote OBS access
+                                        </small>
                                     </div>
 
-                                    {remoteServer && (
-                                        <div className="info-box" style={{ background: remoteConnected ? '#DEF7EC' : '#FEF3C7', borderColor: remoteConnected ? '#10B981' : '#F59E0B' }}>
-                                            <h4 style={{ color: remoteConnected ? '#03543F' : '#92400E' }}>
-                                                {remoteConnected ? 'Syncing to cloud server' : 'Enter URL and start captioning to test connection'}
-                                            </h4>
-                                            <p style={{ color: remoteConnected ? '#047857' : '#A16207' }}>
-                                                OBS Overlay URL: <code>{remoteServer}/overlay.html</code>
-                                            </p>
+                                    <hr style={{ border: 'none', borderTop: '1px solid var(--bg-light)', margin: '16px 0' }} />
+
+                                    {/* Local/Network Overlay */}
+                                    <div style={{ marginBottom: '16px' }}>
+                                        <label className="form-label">Local Network Overlay</label>
+                                        <p style={{ color: 'var(--text-medium)', fontSize: '13px', marginBottom: '8px' }}>
+                                            For OBS on this machine or same network:
+                                        </p>
+                                        <div className="url-box">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" strokeWidth="2">
+                                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                            </svg>
+                                            <input type="text" value={overlayUrl} readOnly />
+                                            <button className="btn btn-primary" onClick={copyOverlayUrl}>
+                                                Copy
+                                            </button>
                                         </div>
-                                    )}
-                                </div>
-
-                                {/* Overlay URL Card */}
-                                <div className="card">
-                                    <div className="card-header">
-                                        <h3 className="card-title">Local Overlay URL</h3>
-                                    </div>
-
-                                    <p style={{ color: 'var(--text-medium)', fontSize: '14px', marginBottom: '12px' }}>
-                                        For OBS on the same machine, use this local URL.
-                                    </p>
-
-                                    <div className="url-box">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" strokeWidth="2">
-                                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                                        </svg>
-                                        <input type="text" value={overlayUrl} readOnly />
-                                        <button className="btn btn-primary" onClick={copyOverlayUrl}>
-                                            Copy
-                                        </button>
                                     </div>
 
                                     <div className="info-box">
-                                        <h4>📺 OBS Studio Setup</h4>
+                                        <h4>OBS Browser Source Settings</h4>
                                         <ul>
-                                            <li><strong>Important:</strong> Run the included <code>start-server.py</code> script first!</li>
-                                            <li>Add a new <strong>Browser Source</strong></li>
-                                            <li>Set URL to: <code>http://localhost:8080?overlay=true</code></li>
-                                            <li>Set dimensions to <strong>1920 × 1080</strong></li>
-                                            <li>Check <strong>"Shutdown source when not visible"</strong> to save resources</li>
-                                            <li>Position the source where you want captions</li>
+                                            <li>Width: <strong>1920</strong>, Height: <strong>1080</strong></li>
+                                            <li>Check <strong>"Shutdown source when not visible"</strong></li>
                                         </ul>
                                     </div>
 
