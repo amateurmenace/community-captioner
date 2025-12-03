@@ -63,15 +63,32 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
 
-        .caption-text:empty {
-            display: none;
+        .status-indicator {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 166, 118, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 14px;
+        }
+
+        .status-indicator.error {
+            background: rgba(220, 38, 38, 0.9);
+        }
+
+        .status-indicator.connected {
+            background: rgba(0, 166, 118, 0.9);
         }
     </style>
 </head>
 <body>
     <div class="overlay-container">
+        <div id="statusIndicator" class="status-indicator">Loading...</div>
         <div id="captionWrapper" class="caption-display bottom">
-            <div id="captionText" class="caption-text"></div>
+            <div id="captionText" class="caption-text">Waiting for captions...</div>
         </div>
     </div>
 
@@ -79,6 +96,9 @@
         // Simple caption overlay - no React, no Babel, works in OBS
         var captionText = document.getElementById('captionText');
         var captionWrapper = document.getElementById('captionWrapper');
+        var statusIndicator = document.getElementById('statusIndicator');
+        var connectionOk = false;
+        var fetchCount = 0;
 
         // Default settings
         var currentSettings = {
@@ -138,28 +158,60 @@
             captionWrapper.className = 'caption-display ' + currentSettings.position;
         }
 
+        function updateStatus(message, isError) {
+            statusIndicator.textContent = message;
+            statusIndicator.className = 'status-indicator ' + (isError ? 'error' : 'connected');
+        }
+
         function fetchCaption() {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', '/api/caption', true);
+            xhr.timeout = 5000;
             xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    try {
-                        var data = JSON.parse(xhr.responseText);
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            fetchCount++;
 
-                        // Update caption text
-                        captionText.textContent = data.caption || '';
+                            // Update status
+                            if (!connectionOk) {
+                                connectionOk = true;
+                                updateStatus('Connected to server', false);
+                                // Hide status after 3 seconds
+                                setTimeout(function() {
+                                    statusIndicator.style.display = 'none';
+                                }, 3000);
+                            }
 
-                        // Update settings if provided
-                        if (data.settings) {
-                            applySettings(data.settings);
+                            // Update caption text
+                            if (data.caption) {
+                                captionText.textContent = data.caption;
+                                captionText.style.display = 'block';
+                            } else {
+                                captionText.style.display = 'none';
+                            }
+
+                            // Update settings if provided
+                            if (data.settings) {
+                                applySettings(data.settings);
+                            }
+                        } catch (e) {
+                            updateStatus('Error parsing data: ' + e.message, true);
                         }
-                    } catch (e) {
-                        console.log('Error parsing caption data:', e);
+                    } else if (xhr.status !== 0) {
+                        updateStatus('Server error: ' + xhr.status, true);
+                        connectionOk = false;
                     }
                 }
             };
             xhr.onerror = function() {
-                console.log('Failed to fetch caption');
+                updateStatus('Cannot connect to server', true);
+                connectionOk = false;
+            };
+            xhr.ontimeout = function() {
+                updateStatus('Connection timeout', true);
+                connectionOk = false;
             };
             xhr.send();
         }
@@ -168,9 +220,10 @@
         setInterval(fetchCaption, 100);
 
         // Initial fetch
+        updateStatus('Connecting to ' + window.location.host + '...', false);
         fetchCaption();
 
-        console.log('Caption overlay loaded - polling /api/caption');
+        console.log('Caption overlay loaded - polling /api/caption at ' + window.location.origin);
     </script>
 </body>
 </html>
