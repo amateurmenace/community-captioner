@@ -67,6 +67,10 @@ def create_download_zip():
     return zip_buffer.getvalue()
 
 class CloudHandler(http.server.SimpleHTTPRequestHandler):
+    def do_HEAD(self):
+        # Handle HEAD requests same as GET but without body
+        self.do_GET()
+
     def do_GET(self):
         parsed = urlparse(self.path)
 
