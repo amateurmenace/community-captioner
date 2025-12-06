@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community Captioner - Free Live Captions for OBS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-cream: #F5F3EE;
+            --bg-white: #FFFFFF;
+            --bg-dark: #2D3A2E;
+            --green-primary: #3D5A47;
+            --green-light: #4A6B52;
+            --green-bright: #5B8C65;
+            --green-bar-1: #3D5A47;
+            --green-bar-2: #6B9B76;
+            --text-dark: #3D5A47;
+            --text-medium: #5A6B5E;
+            --text-light: #8A9A8E;
+            --border-light: #D4D2CD;
+            --border-card: #E0DED9;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', -apple-system, sans-serif; background: var(--bg-cream); color: var(--text-dark); line-height: 1.6; min-height: 100vh; }
+        .container { max-width: 720px; margin: 0 auto; padding: 40px 20px; }
+
+        /* Hero */
+        .hero { text-align: center; margin-bottom: 40px; }
+        .big-branding { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 24px; }
+        .big-tagline { font-size: 13px; color: var(--text-medium); text-align: right; line-height: 1.3; }
+        .big-tagline a { color: var(--text-dark); font-weight: 700; text-decoration: none; }
+        .big-tagline a:hover { color: var(--green-primary); }
+        .big-logo { height: 50px; width: auto; }
+        .logo-mark { display: flex; justify-content: center; gap: 0; margin-bottom: 16px; }
+        .logo-bars { display: flex; flex-direction: column; gap: 4px; }
+        .logo-bar { height: 6px; border-radius: 3px; width: 180px; }
+        .logo-bar-1 { background: var(--green-bar-1); }
+        .logo-bar-2 { background: var(--green-bar-2); }
+        .logo-text { font-weight: 700; font-size: 32px; color: var(--text-dark); line-height: 1.1; margin-bottom: 8px; }
+        .cc-badge { display: inline-flex; border: 2px solid var(--text-dark); border-radius: 6px; padding: 2px 8px; font-size: 18px; margin-left: 8px; vertical-align: middle; }
+        .tagline { color: var(--text-medium); font-size: 18px; }
+
+        /* Cards */
+        .card { background: var(--bg-white); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 20px; }
+        .card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+        .step-number { width: 36px; height: 36px; background: var(--green-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; flex-shrink: 0; }
+        .card-title { font-size: 20px; font-weight: 600; }
+        .card p { color: var(--text-medium); margin-bottom: 14px; }
+        .card p:last-child { margin-bottom: 0; }
+
+        /* Download Button */
+        .download-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--green-primary); color: white; padding: 14px 28px; border-radius: var(--radius-md); font-size: 16px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+        .download-btn:hover { background: var(--green-light); transform: translateY(-1px); }
+        .download-btn svg { width: 20px; height: 20px; }
+
+        /* Launch Button */
+        .launch-btn { display: inline-flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #00A676 0%, #008F66 100%); color: white; padding: 18px 40px; border-radius: var(--radius-md); font-size: 20px; font-weight: 700; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 14px rgba(0, 166, 118, 0.4); }
+        .launch-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 166, 118, 0.5); }
+
+        /* Requirements */
+        .requirements { display: flex; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
+        .req-item { display: flex; align-items: center; gap: 8px; background: var(--bg-cream); padding: 10px 16px; border-radius: var(--radius-sm); font-weight: 500; font-size: 14px; }
+
+        /* Steps */
+        .step-visual { background: var(--bg-cream); border-radius: var(--radius-md); padding: 20px; margin: 16px 0; }
+        .step-visual-title { font-weight: 600; font-size: 14px; margin-bottom: 10px; color: var(--text-dark); }
+        .step-visual img { max-width: 100%; border-radius: var(--radius-sm); }
+
+        /* Platform Tabs */
+        .platform-tabs { display: flex; gap: 6px; margin-bottom: 16px; }
+        .platform-tab { padding: 8px 18px; border: 1px solid var(--border-light); background: var(--bg-cream); border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text-medium); cursor: pointer; transition: all 0.15s; }
+        .platform-tab:hover { border-color: var(--green-primary); color: var(--green-primary); }
+        .platform-tab.active { background: var(--green-primary); border-color: var(--green-primary); color: white; }
+        .platform-content { display: none; }
+        .platform-content.active { display: block; }
+
+        /* Instructions List */
+        .instruction-list { margin: 10px 0 16px 20px; color: var(--text-medium); }
+        .instruction-list li { margin-bottom: 6px; }
+        kbd { background: var(--bg-cream); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; border: 1px solid var(--border-light); }
+
+        /* Code Block */
+        .code-block { background: var(--bg-dark); border-radius: var(--radius-sm); padding: 14px 18px; font-family: 'SF Mono', Monaco, monospace; font-size: 13px; color: #A8D5A2; margin: 10px 0; cursor: pointer; position: relative; transition: all 0.2s; overflow-x: auto; }
+        .code-block:hover { background: #3A4A3B; }
+        .code-block .hint { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #8A9A8E; opacity: 0; transition: opacity 0.2s; }
+        .code-block:hover .hint { opacity: 1; }
+        .code-block.copied .hint { color: #A8D5A2; opacity: 1; }
+        .code-label { font-size: 13px; color: var(--text-light); margin-bottom: 6px; margin-top: 14px; }
+        .code-label:first-child { margin-top: 0; }
+
+        /* Info/Warning Boxes */
+        .info-box { background: rgba(93, 140, 101, 0.12); border: 1px solid var(--green-bright); border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 16px; }
+        .info-box h4 { color: var(--green-primary); margin-bottom: 6px; font-size: 14px; }
+        .info-box p { margin-bottom: 0; font-size: 13px; }
+        .warning-box { background: #FEF6E6; border: 1px solid #E5A835; border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 16px; }
+        .warning-box h4 { color: #9A6700; margin-bottom: 6px; font-size: 14px; }
+        .warning-box p { color: #7A5200; margin-bottom: 0; font-size: 13px; }
+        .warning-box a { color: #7A5200; }
+        .warning-box code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+
+        /* FAQ */
+        .faq-item { border-bottom: 1px solid var(--border-light); padding: 14px 0; }
+        .faq-item:last-child { border-bottom: none; }
+        .faq-q { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+        .faq-a { color: var(--text-medium); font-size: 13px; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 28px 16px; color: var(--text-light); font-size: 13px; line-height: 1.6; border-top: 1px solid var(--border-light); margin-top: 20px; }
+        .footer a { color: var(--green-primary); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .footer-links { margin-top: 8px; display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .footer-link { display: flex; align-items: center; gap: 4px; }
+
+        @media (max-width: 600px) {
+            .card { padding: 20px; }
+            .download-btn { width: 100%; justify-content: center; }
+            .platform-tabs { flex-wrap: wrap; }
+            .platform-tab { flex: 1; min-width: 70px; text-align: center; padding: 8px 12px; }
+            .requirements { flex-direction: column; }
+            .logo-text { font-size: 26px; }
+            .logo-bar { width: 140px; }
+            .big-tagline { text-align: center; font-size: 12px; }
+            .big-logo { height: 45px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="hero">
+            <div class="big-branding">
+                <span class="big-tagline">A community AI project from<br><a href="https://brooklineinteractive.org" target="_blank">Brookline Interactive Group</a></span>
+                <img src="big-logo.png" alt="Brookline Interactive Group" class="big-logo">
+            </div>
+            <div class="logo-mark">
+                <div class="logo-bars">
+                    <div class="logo-bar logo-bar-1"></div>
+                    <div class="logo-bar logo-bar-2"></div>
+                </div>
+            </div>
+            <div class="logo-text">COMMUNITY CAPTIONER <span class="cc-badge">CC</span></div>
+            <p class="tagline">Free, open-source live captions for OBS and streaming</p>
+        </header>
+
+        <!-- Launch App Card -->
+        <div class="card" style="text-align: center; padding: 36px;">
+            <h2 style="font-size: 24px; margin-bottom: 12px;">Ready to add captions to your stream?</h2>
+            <p style="font-size: 16px; margin-bottom: 24px;">No download required. Works directly in your browser with Chrome or Edge.</p>
+            <a href="app.html" class="launch-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Launch App
+            </a>
+            <p style="font-size: 13px; color: var(--text-light); margin-top: 16px;">Uses your browser's speech recognition • Syncs to OBS via unique channel URL</p>
+        </div>
+
+        <div style="text-align: center; margin: 28px 0; color: var(--text-light); font-size: 14px;">
+            <span>— or download for offline use —</span>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="step-number">1</span>
+                <h2 class="card-title">Download Desktop App</h2>
+            </div>
+            <p>For the most reliable captioning without internet, download the desktop version. Works on Mac, Windows, and Linux.</p>
+            <a href="https://github.com/amateurmenace/community-captioner/releases/tag/v1.0.0" class="download-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download for Desktop
+            </a>
+            <div class="requirements">
+                <div class="req-item"><span>🐍</span><span>Python 3.8 or newer</span></div>
+                <div class="req-item"><span>🎤</span><span>Microphone or audio input</span></div>
+                <div class="req-item"><span>🌐</span><span>Chrome or Edge browser</span></div>
+            </div>
+            <div class="info-box">
+                <h4>Don't have Python?</h4>
+                <p>Download it free from <a href="https://www.python.org/downloads/" target="_blank">python.org</a>. During installation, check "Add Python to PATH".</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="step-number">2</span>
+                <h2 class="card-title">Extract the Download</h2>
+            </div>
+            <p>Find the downloaded <strong>community-captioner.zip</strong> file (usually in your Downloads folder) and extract it:</p>
+            <div class="platform-tabs">
+                <button class="platform-tab active" onclick="showPlatform('mac')">Mac</button>
+                <button class="platform-tab" onclick="showPlatform('windows')">Windows</button>
+                <button class="platform-tab" onclick="showPlatform('linux')">Linux</button>
+            </div>
+            <div id="mac-extract" class="platform-content active">
+                <p><strong>Double-click</strong> the zip file in Finder. It will automatically extract to a folder called <code>community-captioner</code>.</p>
+            </div>
+            <div id="windows-extract" class="platform-content">
+                <p><strong>Right-click</strong> the zip file and select <strong>"Extract All..."</strong>, then click Extract.</p>
+            </div>
+            <div id="linux-extract" class="platform-content">
+                <p><strong>Right-click</strong> the zip file and select <strong>"Extract Here"</strong>, or use: <code>unzip community-captioner.zip</code></p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="step-number">3</span>
+                <h2 class="card-title">Open Terminal</h2>
+            </div>
+            <p>You'll need to open Terminal (Mac/Linux) or Command Prompt (Windows) to run the app. Here's how:</p>
+            <div id="mac-terminal" class="platform-content active">
+                <ol class="instruction-list">
+                    <li>Press <kbd>Cmd</kbd> + <kbd>Space</kbd> to open Spotlight</li>
+                    <li>Type <strong>Terminal</strong> and press Enter</li>
+                </ol>
+                <div class="info-box">
+                    <h4>Tip: Easy way</h4>
+                    <p>Open the <code>community-captioner</code> folder in Finder, then right-click and select "New Terminal at Folder" (or drag the folder onto Terminal in your Dock).</p>
+                </div>
+            </div>
+            <div id="windows-terminal" class="platform-content">
+                <ol class="instruction-list">
+                    <li>Open the <code>community-captioner</code> folder in File Explorer</li>
+                    <li>Click in the address bar, type <strong>cmd</strong>, and press Enter</li>
+                </ol>
+                <p>This opens Command Prompt already in the right folder!</p>
+            </div>
+            <div id="linux-terminal" class="platform-content">
+                <ol class="instruction-list">
+                    <li>Press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>T</kbd> to open Terminal</li>
+                    <li>Or right-click in the folder and select "Open Terminal Here"</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="step-number">4</span>
+                <h2 class="card-title">Run the App</h2>
+            </div>
+            <p>In your terminal, navigate to the folder and start the app:</p>
+            <div id="mac-run" class="platform-content active">
+                <p class="code-label">If you're not already in the folder, navigate to it:</p>
+                <div class="code-block" onclick="copyCode(this)"><span class="hint">Click to copy</span><code>cd ~/Downloads/community-captioner</code></div>
+                <p class="code-label">Start the app:</p>
+                <div class="code-block" onclick="copyCode(this)"><span class="hint">Click to copy</span><code>python3 start-server.py</code></div>
+            </div>
+            <div id="windows-run" class="platform-content">
+                <p class="code-label">If you opened cmd from the folder, just run:</p>
+                <div class="code-block" onclick="copyCode(this)"><span class="hint">Click to copy</span><code>python start-server.py</code></div>
+                <p class="code-label">Or navigate first:</p>
+                <div class="code-block" onclick="copyCode(this)"><span class="hint">Click to copy</span><code>cd %USERPROFILE%\Downloads\community-captioner</code></div>
+            </div>
+            <div id="linux-run" class="platform-content">
+                <p class="code-label">Navigate to the folder:</p>
+                <div class="code-block" onclick="copyCode(this)"><span class="hint">Click to copy</span><code>cd ~/Downloads/community-captioner</code></div>
+                <p class="code-label">Start the app:</p>
+                <div class="code-block" onclick="copyCode(this)"><span class="hint">Click to copy</span><code>python3 start-server.py</code></div>
+            </div>
+            <div class="info-box">
+                <h4>What happens next?</h4>
+                <p>Your web browser will automatically open to the control panel at <code>http://localhost:8080</code>. Keep the terminal window open while using the app!</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="step-number">5</span>
+                <h2 class="card-title">Add to OBS</h2>
+            </div>
+            <p>In OBS Studio, add a <strong>Browser Source</strong> with these settings:</p>
+            <div class="step-visual">
+                <div class="step-visual-title">Browser Source Settings</div>
+                <p style="margin: 0; font-size: 14px;">
+                    <strong>URL:</strong> <code>http://138.197.15.64:8080/overlay.html</code><br>
+                    <strong>Width:</strong> 1920<br>
+                    <strong>Height:</strong> 1080
+                </p>
+            </div>
+            <p>Or use <code>http://localhost:8080?overlay=true</code> if OBS is on the same computer as the control panel.</p>
+            <div class="info-box">
+                <h4>That's it! 🎉</h4>
+                <p>Click "Start Captioning" in the control panel and start speaking. Captions will appear live in OBS!</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title" style="margin-bottom: 12px;">Frequently Asked Questions</h3>
+            <div class="faq-item">
+                <div class="faq-q">The microphone stops when I switch windows</div>
+                <div class="faq-a">Click "Pop Out" in the control panel to open it in a separate window. This keeps the microphone active when you switch to other apps.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">How do I use audio from a mixer or capture card?</div>
+                <div class="faq-a">Connect the audio output to your computer (via USB audio interface or built-in input), then select that device in the Audio Input dropdown.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">Can I use this with a video switcher?</div>
+                <div class="faq-a">Yes! Route the audio output from your switcher to your computer, select it as the input, and add the overlay URL as a browser source in your switcher's graphics system.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-q">Which browsers work?</div>
+                <div class="faq-a">Chrome and Edge work best. Safari and Firefox don't support the Web Speech API used for recognition.</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>A community AI project from <a href="https://brooklineinteractive.org" target="_blank">Brookline Interactive Group</a><br>Designed and developed by <a href="https://weirdmachine.org" target="_blank">Stephen Walter</a></p>
+        <div class="footer-links">
+            <a href="https://github.com/amateurmenace/community-captioner" target="_blank" class="footer-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                GitHub
+            </a>
+            <span class="footer-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"/></svg>
+                CC BY-SA 4.0
+            </span>
+        </div>
+    </footer>
+
+    <script>
+        function showPlatform(platform) {
+            document.querySelectorAll('.platform-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.platform-content').forEach(c => c.classList.remove('active'));
+            ['extract', 'terminal', 'run'].forEach(section => {
+                const el = document.getElementById(platform + '-' + section);
+                if (el) el.classList.add('active');
+            });
+        }
+        function copyCode(el) {
+            const code = el.querySelector('code').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const hint = el.querySelector('.hint');
+                hint.textContent = 'Copied!';
+                el.classList.add('copied');
+                setTimeout(() => { hint.textContent = 'Click to copy'; el.classList.remove('copied'); }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
